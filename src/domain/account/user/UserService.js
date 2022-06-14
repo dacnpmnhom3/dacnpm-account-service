@@ -15,48 +15,48 @@ class UserService extends BaseService {
   }
 
   async createAnUser(data) {
-    const response = {
-      json: null,
-      statusCode: null,
-    };
-
-    // Validate data and create object
-    const newUser = await createValidate(data);
-    if (newUser.error) {
-      response.statusCode = 400;
-      response.json = {
-        message: newUser.Message,
+      const response = {
+          json: null,
+          statusCode: null,
       };
+
+      // Validate data and create object
+      const newUser = await createValidate(data); ``
+      if (newUser.error) {
+          response.statusCode = 400;
+          response.json = {
+              message: newUser.Message,
+          };
+          return response;
+      }
+
+      // Check Email Exist
+      const checkEmailResult = await userRepository.findOneByEmail(data.email);
+
+      if (checkEmailResult.isSuccess) {
+          response.statusCode = 400;
+          response.json = {
+              success: false,
+              message: "Email has already registered",
+          };
+          return response;
+      }
+
+      // HashPassword
+      newUser.info.password = await hashPassword(newUser.info.password);
+
+      // Create new user
+      const result = await userRepository.create(newUser.info);
+      if (!result.isSuccess) {
+          response.statusCode = 500;
+          response.json = {
+              message: result.message,
+          };
+          return response;
+      }
+
+      response.json = result;
       return response;
-    }
-
-    // Check Email Exist
-    const checkEmailResult = await userRepository.findOneByEmail(data.email);
-
-    if (checkEmailResult.isSuccess) {
-      response.statusCode = 400;
-      response.json = {
-        success: false,
-        message: "Email has already registered",
-      };
-      return response;
-    }
-
-    // HashPassword
-    newUser.info.password = await hashPassword(newUser.info.password);
-
-    // Create new user
-    const result = await userRepository.create(newUser.info);
-    if (!result.isSuccess) {
-      response.statusCode = 500;
-      response.json = {
-        message: result.message,
-      };
-      return response;
-    }
-
-    response.json = result;
-    return response;
   }
 
   async loginAnUser(data) {
@@ -158,6 +158,24 @@ class UserService extends BaseService {
     response.statusCode = 200;
     response.json = result;
     return response;
+  }
+
+  async checkUserExist(id, name) {
+      const response = {
+          json: null,
+          statusCode: null,
+      };
+      const result = await userRepository.findOneByNameAndId(id, name);
+      if (!result) {
+          response.statusCode = 500;
+          response.json = {
+              message: result.message,
+          };
+      }
+      response.statusCode = 200;
+      response.json = result;
+      return response;
+
   }
 
   // get user by email
