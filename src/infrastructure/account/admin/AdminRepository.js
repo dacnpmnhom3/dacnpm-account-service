@@ -2,6 +2,7 @@ import autoBind from "auto-bind";
 
 import AdminModel from "./AdminModel";
 import BaseRepository from "../../../../base/BaseRepository";
+// import { date } from "@hapi/joi";
 
 class AdminRepository extends BaseRepository {
   constructor() {
@@ -28,9 +29,14 @@ class AdminRepository extends BaseRepository {
 
   async findOneByNameAndId(id, name) {
     const result = await this.model.findOne({
-      where: { id: id, name: name },
-      raw: true
+      where: { id, name },
+      raw: true,
     });
+    return result;
+  }
+
+  async update(id, data) {
+    const result = await this.model.update(data, { where: { id } });
     return result;
   }
 }

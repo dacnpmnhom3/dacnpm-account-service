@@ -4,6 +4,12 @@ import sequelize from "../../../../config/MySQLConfig";
 class Seller extends Model {}
 Seller.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrementIdentity: true,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     email: {
       type: DataTypes.STRING,
       default: "",

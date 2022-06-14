@@ -4,13 +4,16 @@
 // Handle business
 import autoBind from "auto-bind";
 
-import { createAdminsFromArray, createAdmin } from "./AdminFactory";
-import { hashPassword } from "../../../utils/Utility";
+import {
+  createAdminsFromArray, createAdmin, loginAdmin, updateAdmin,
+} from "./AdminFactory";
+import { hashPassword, validPassword } from "../../../utils/Utility";
 import BaseService from "../../../../base/BaseService";
 import AdminRepository from "../../../infrastructure/account/admin/AdminRepository";
 import HttpError from "../../../utils/HttpError";
 import HttpResponse from "../../../utils/HttpResponse";
 import MailerHepler from "../../../../helper/email/EmailHelper";
+import { createJWT } from "../../../auth/auth.services";
 
 const adminRepository = new AdminRepository();
 const emailer = new MailerHepler();
@@ -28,21 +31,25 @@ class AdminService extends BaseService {
     };
 
     // Validate data and create object
-    const newAdmin = createAdmin(data);
-    if (newAdmin.errMessage) {
-      return new HttpError({ statusCode: 400, message: newAdmin.errMessage });
+    const newAdmin = await createAdmin(data);
+
+    if (newAdmin.error === true) {
+      response.statusCode = 400;
+      response.json = {
+        message: newAdmin.Message,
+      };
+      return response;
     }
 
     // Check Email Exist
     const checkEmailResult = await adminRepository.findOneByEmail(data.email);
 
-    console.log(checkEmailResult);
-
-    if (!checkEmailResult.isSuccess) {
-      return new HttpError({
-        statusCode: 400,
+    if (checkEmailResult.isSuccess) {
+      response.statusCode = 400;
+      response.json = {
         message: "Email has already registered",
-      });
+      };
+      return response;
     }
 
     // HashPassword
@@ -226,7 +233,7 @@ class AdminService extends BaseService {
   async sendEmail(email, password) {
     return true;
   }
-  
+
   async checkAdminExist(id, name) {
     const response = {
       json: null,
@@ -245,8 +252,8 @@ class AdminService extends BaseService {
     response.statusCode = 200;
     return response;
   }
-  
-   async inviteAdmins(emails) {
+
+  async inviteAdmins(emails) {
     const admins = createAdminsFromArray(emails);
 
     if (admins.errMessage) {
@@ -272,6 +279,36 @@ class AdminService extends BaseService {
       isSuccess: true,
       message: "Create invitations successfully!",
     });
+  }
+
+  async update(id, data) {
+    const response = {
+      json: null,
+      statusCode: null,
+    };
+
+    const result = await updateAdmin(data);
+    if (result.error) {
+      response.statusCode = 400;
+      response.json = {
+        message: result.message,
+      };
+      return response;
+    }
+
+    const adminUpdate = await adminRepository.update(id, data);
+    if (adminUpdate[0] === 0) {
+      response.statusCode = 500;
+      response.json = {
+        message: "Update Fail!",
+      };
+    } else {
+      response.statusCode = 200;
+      response.json = {
+        message: "Update successfully",
+      };
+    }
+    return response;
   }
 }
 
