@@ -1,8 +1,7 @@
 import joi from "@hapi/joi";
-import { makeCode } from "../../../utils/Utility";
 import { Admin } from "./AdminDomainModel";
 
-export const createAdmin = (data) => {
+export const createAdmin = async (data) => {
   const admin = joi.object({
     phone: joi.optional(),
     address: joi.string().optional(),
@@ -34,21 +33,22 @@ export const createAdmin = (data) => {
   return newAdmin;
 };
 
-export const createAdminsFromArray = (data) => {
-  const emails = joi.array().required().items(joi.string().email());
-  const validationResult = emails.validate(data);
+export const loginAdmin = async (data) => {
+  const admin = joi.object({
+    password: joi.string().required(),
+    email: joi.string().email().required(),
+  });
 
-  const admins = { info: [], errMessage: "" };
+  const validationResult = admin.validate(data);
+
+  const result = {
+    error: false,
+    message: "",
+  };
 
   if (validationResult.error) {
-    console.log(validationResult.error.details[0].message);
-    admins.errMessage = validationResult.error.details[0].message;
-  } else {
-    data.forEach((email) => {
-      const password = makeCode(8);
-      admins.info.push(new Admin(email, password));
-    });
+    result.message = validationResult.error.details[0].message;
+    result.error = true;
   }
-
-  return admins;
+  return result;
 };

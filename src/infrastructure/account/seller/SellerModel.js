@@ -4,6 +4,10 @@ import sequelize from "../../../../config/MySQLConfig";
 class Seller extends Model {}
 Seller.init(
   {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+    },
     email: {
       type: DataTypes.STRING,
       default: "",
@@ -57,7 +61,7 @@ Seller.init(
     sequelize,
     modelName: "seller",
     paranoid: true,
-  },
+  }
 );
 
 export default Seller;
