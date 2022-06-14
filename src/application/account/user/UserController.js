@@ -13,7 +13,7 @@ class UserController extends BaseController {
   async login(req, res) {
     try {
       const data = req.body;
-      const result = await UserService.loginUser(data);
+      const result = await UserService.loginAnUser(data);
       res.status(result.statusCode).json(result.json);
     } catch (error) {
       console.log(error);
@@ -23,7 +23,7 @@ class UserController extends BaseController {
   async register(req, res) {
     try {
       const data = req.body;
-      const result = await UserService.createUser(data);
+      const result = await UserService.createAnUser(data);
       res.status(result.statusCode).json(result.json);
     } catch (error) {
       console.log(error);

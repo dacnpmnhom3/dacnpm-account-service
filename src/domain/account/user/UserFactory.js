@@ -54,3 +54,27 @@ export const loginValidate = async (data) => {
   }
   return newUser;
 };
+
+export const updateUser = async (data) => {
+  const user = joi.object({
+    phone: joi.optional(),
+    address: joi.string().optional(),
+    password: joi.string().optional(),
+    email: joi.string().email().optional(),
+    fullName: joi.string().min(2).max(50).optional(),
+  });
+
+  const validationResult = user.validate(data);
+
+  if (validationResult.error) {
+    return {
+      error: true,
+      message: validationResult.error.details[0].message,
+    };
+  }
+
+  return {
+    error: false,
+    message: "",
+  };
+};

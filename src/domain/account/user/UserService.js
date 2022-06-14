@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import autoBind from "auto-bind";
-import { createValidate, loginValidate } from "./UserFactory";
+import { createValidate, loginValidate, updateUser } from "./UserFactory";
 import BaseService from "../../../../base/BaseService";
 import UserRepository from "../../../infrastructure/account/user/UserRepository";
 import { validPassword, hashPassword } from "../../../../helper/Utility";
@@ -15,48 +15,49 @@ class UserService extends BaseService {
   }
 
   async createAnUser(data) {
-      const response = {
-          json: null,
-          statusCode: null,
+    const response = {
+      json: null,
+      statusCode: null,
+    };
+
+    // Validate data and create object
+    const newUser = await createValidate(data);
+    if (newUser.error) {
+      response.statusCode = 400;
+      response.json = {
+        message: newUser.Message,
       };
-
-      // Validate data and create object
-      const newUser = await createValidate(data); ``
-      if (newUser.error) {
-          response.statusCode = 400;
-          response.json = {
-              message: newUser.Message,
-          };
-          return response;
-      }
-
-      // Check Email Exist
-      const checkEmailResult = await userRepository.findOneByEmail(data.email);
-
-      if (checkEmailResult.isSuccess) {
-          response.statusCode = 400;
-          response.json = {
-              success: false,
-              message: "Email has already registered",
-          };
-          return response;
-      }
-
-      // HashPassword
-      newUser.info.password = await hashPassword(newUser.info.password);
-
-      // Create new user
-      const result = await userRepository.create(newUser.info);
-      if (!result.isSuccess) {
-          response.statusCode = 500;
-          response.json = {
-              message: result.message,
-          };
-          return response;
-      }
-
-      response.json = result;
       return response;
+    }
+
+    // Check Email Exist
+    const checkEmailResult = await userRepository.findOneByEmail(data.email);
+
+    if (checkEmailResult.isSuccess) {
+      response.statusCode = 400;
+      response.json = {
+        success: false,
+        message: "Email has already registered",
+      };
+      return response;
+    }
+
+    // HashPassword
+    newUser.info.password = await hashPassword(newUser.info.password);
+
+    // Create new user
+    const result = await userRepository.create(newUser.info);
+    if (!result.isSuccess) {
+      response.statusCode = 500;
+      response.json = {
+        message: result.message,
+      };
+      return response;
+    }
+
+    response.statusCode = 200;
+    response.json = result;
+    return response;
   }
 
   async loginAnUser(data) {
@@ -106,10 +107,14 @@ class UserService extends BaseService {
       email: checkEmailResult.data.email,
       name: checkEmailResult.data.name,
     };
+
+    const user = { ...checkEmailResult.data };
+    delete user.password;
     const jwtToken = await createJWT(payload);
     response.statusCode = 200;
     response.json = {
       success: true,
+      user,
       token: jwtToken,
     };
     return response;
@@ -161,21 +166,20 @@ class UserService extends BaseService {
   }
 
   async checkUserExist(id, name) {
-      const response = {
-          json: null,
-          statusCode: null,
+    const response = {
+      json: null,
+      statusCode: null,
+    };
+    const result = await userRepository.findOneByNameAndId(id, name);
+    if (!result) {
+      response.statusCode = 500;
+      response.json = {
+        message: result.message,
       };
-      const result = await userRepository.findOneByNameAndId(id, name);
-      if (!result) {
-          response.statusCode = 500;
-          response.json = {
-              message: result.message,
-          };
-      }
-      response.statusCode = 200;
-      response.json = result;
-      return response;
-
+    }
+    response.statusCode = 200;
+    response.json = result;
+    return response;
   }
 
   // get user by email
@@ -195,6 +199,36 @@ class UserService extends BaseService {
 
     response.statusCode = 200;
     response.json = result;
+    return response;
+  }
+
+  async update(id, data) {
+    const response = {
+      json: null,
+      statusCode: null,
+    };
+
+    const result = await updateUser(data);
+    if (result.error) {
+      response.statusCode = 400;
+      response.json = {
+        message: result.message,
+      };
+      return response;
+    }
+
+    const userUpdate = await userRepository.update(id, data);
+    if (userUpdate[0] === 0) {
+      response.statusCode = 500;
+      response.json = {
+        message: "Update Fail!",
+      };
+    } else {
+      response.statusCode = 200;
+      response.json = {
+        message: "Update successfully",
+      };
+    }
     return response;
   }
 }
