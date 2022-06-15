@@ -1,19 +1,23 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
-/* eslint-disable class-methods-use-this */
 // Handle business
 import autoBind from "auto-bind";
+import {
+  validPassword,
+  hashPassword,
+  makeCode,
+} from "../../../../helper/Utility";
 
 import {
-  createAdminsFromArray, createAdmin, loginAdmin, updateAdmin,
+  createAdminsFromArray,
+  createAdmin,
+  loginAdmin,
+  updateAdmin,
 } from "./AdminFactory";
-import { hashPassword, validPassword } from "../../../utils/Utility";
 import BaseService from "../../../../base/BaseService";
 import AdminRepository from "../../../infrastructure/account/admin/AdminRepository";
 import HttpError from "../../../utils/HttpError";
 import HttpResponse from "../../../utils/HttpResponse";
-import MailerHepler from "../../../../helper/email/EmailHelper";
 import { createJWT } from "../../../auth/auth.services";
+import MailerHepler from "../../../../helper/email/EmailHelper";
 
 const adminRepository = new AdminRepository();
 const emailer = new MailerHepler();
@@ -32,8 +36,7 @@ class AdminService extends BaseService {
 
     // Validate data and create object
     const newAdmin = await createAdmin(data);
-
-    if (newAdmin.error === true) {
+    if (newAdmin.error) {
       response.statusCode = 400;
       response.json = {
         message: newAdmin.Message,
@@ -44,9 +47,12 @@ class AdminService extends BaseService {
     // Check Email Exist
     const checkEmailResult = await adminRepository.findOneByEmail(data.email);
 
+    console.log(checkEmailResult);
+
     if (checkEmailResult.isSuccess) {
       response.statusCode = 400;
       response.json = {
+        success: false,
         message: "Email has already registered",
       };
       return response;
@@ -115,7 +121,7 @@ class AdminService extends BaseService {
     response.statusCode = 200;
 
     const user = admin.data;
-    delete user.password;
+    user.password = "";
 
     response.json = {
       success: true,
@@ -183,10 +189,7 @@ class AdminService extends BaseService {
       return response;
     }
     // generate password
-    const password = generator.generate({
-      length: 8,
-      numbers: true,
-    });
+    const password = makeCode(8);
 
     // create a admin object to make a new admin model from admin factory
     const createdAdmin = {
@@ -230,9 +233,9 @@ class AdminService extends BaseService {
   }
 
   // the service for sending email to new admin
-  async sendEmail(email, password) {
-    return true;
-  }
+  // async sendEmail(email, password) {
+  //   return true;
+  // }
 
   async checkAdminExist(id, name) {
     const response = {

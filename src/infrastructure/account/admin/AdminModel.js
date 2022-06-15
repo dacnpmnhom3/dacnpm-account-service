@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../../../../config/MySQLConfig";
 
-class Admin extends Model {}
+class Admin extends Model { }
 Admin.init(
   {
     id: {
@@ -12,6 +12,7 @@ Admin.init(
     },
     fullName: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,

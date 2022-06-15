@@ -1,6 +1,6 @@
-/* eslint-disable operator-linebreak */
 import joi from "@hapi/joi";
 import { Seller } from "./SellerDomainModel";
+import { UPDATE_SELLER, CREATE_SELLER, DELETE_SELLER } from "./event.const";
 
 export const createSeller = async (data) => {
   const seller = joi.object({
@@ -9,6 +9,7 @@ export const createSeller = async (data) => {
     password: joi.string().required(),
     email: joi.string().email().required(),
     fullName: joi.string().min(2).max(50).required(),
+    confirmPassword: joi.string().required(),
   });
 
   const newSeller = {
@@ -18,26 +19,21 @@ export const createSeller = async (data) => {
   };
   const validationResult = seller.validate(data);
 
+  //validate confirm password
+  if (data.password !== data.confirmPassword) {
+    newSeller.error = true;
+    newSeller.Message = "Confirm password is not match";
+    return newSeller;
+  }
+
   if (validationResult.error) {
     newSeller.error = true;
     newSeller.Message = validationResult.error.details[0].message;
   } else {
-    newSeller.info = new Seller(
-      data.email,
-      data.password,
-      data.fullName,
-      data.phone || "",
-      data.idCardNumber || "",
-      data.taxCode || "",
-      data.address || "",
-      data.frontIdCardImage ||
-        "https://res.cloudinary.com/dnvgrzylh/image/upload/v1652375647/frontCard_usvrlr.png",
-      data.backIdCardImage ||
-        "https://res.cloudinary.com/dnvgrzylh/image/upload/v1652375698/backCard_t9jrnl.jpg",
-      data.portrait ||
-        "https://res.cloudinary.com/dnvgrzylh/image/upload/v1652376072/portraitAvatar_cbzmc7.jpg",
-      data.isVerified || 0,
-    );
+    newSeller.info = {
+      name: CREATE_SELLER,
+      data: new Seller(data.email, data.password, data.fullName, data.phone),
+    };
   }
 
   return newSeller;
@@ -61,4 +57,31 @@ export const loginSeller = async (data) => {
     result.error = true;
   }
   return result;
+};
+
+export const updateSeller = async (id, data) => {
+  const seller = joi.object({
+    phone: joi.optional(),
+    address: joi.string().optional(),
+    // password: joi.string().optional(),
+    email: joi.string().email().optional(),
+    fullName: joi.string().min(2).max(50).optional(),
+  });
+
+  const validationResult = seller.validate(data);
+
+  if (validationResult.error) {
+    return {
+      isSuccess: false,
+      message: validationResult.error.details[0].message,
+    };
+  }
+
+  return {
+    idEvent: id,
+    name: UPDATE_SELLER,
+    data: JSON.stringify({
+      ...data,
+    }),
+  };
 };

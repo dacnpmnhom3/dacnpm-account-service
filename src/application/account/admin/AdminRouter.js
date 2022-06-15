@@ -4,7 +4,6 @@ import AdminService from "../../../domain/account/admin/AdminService";
 
 const router = express.Router();
 
-router.get("/", AdminController.getAll);
 router.post("/register", AdminController.register);
 router.post("/login", AdminController.login);
 router.get("/:id", AdminController.getOne);

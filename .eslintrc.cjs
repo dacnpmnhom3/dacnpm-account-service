@@ -17,5 +17,6 @@ module.exports = {
     "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
     "no-param-reassign": [0],
     "linebreak-style": ["off", "windows"],
+    "class-methods-use-this": "off",
   },
 };
