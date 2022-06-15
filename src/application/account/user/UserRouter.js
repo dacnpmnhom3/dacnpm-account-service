@@ -1,16 +1,17 @@
 import express from "express";
 import UserService from "../../../domain/account/user/UserService";
 import UserController from "./UserController";
+import { authenticateByJwt } from "../../../auth/auth.services";
 
 const router = express.Router();
 
-router.get("/", UserController.getAll);
+router.get("/", authenticateByJwt, UserController.getAll);
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
-router.get("/id/:id", UserController.getOne);
-router.get("/email", UserController.getOneByEmail);
+router.get("/id/:id", authenticateByJwt, UserController.getOne);
+router.get("/email", authenticateByJwt, UserController.getOneByEmail);
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateByJwt, async (req, res) => {
   const { id } = req.params;
   const data = req.body;
 

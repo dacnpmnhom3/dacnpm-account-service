@@ -26,6 +26,7 @@ class BaseRepository {
       console.error(error);
       return {
         isSuccess: false,
+        message: "Not Found",
       };
     }
   }

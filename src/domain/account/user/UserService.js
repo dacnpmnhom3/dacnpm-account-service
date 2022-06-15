@@ -135,7 +135,7 @@ class UserService extends BaseService {
     if (!result) {
       response.statusCode = 500;
       response.json = {
-        message: result.message,
+        message: "Not Found",
       };
       return response;
     }
@@ -155,7 +155,7 @@ class UserService extends BaseService {
     if (!result) {
       response.statusCode = 500;
       response.json = {
-        message: result.message,
+        message: "Not found",
       };
       return response;
     }
@@ -174,7 +174,7 @@ class UserService extends BaseService {
     if (!result) {
       response.statusCode = 500;
       response.json = {
-        message: result.message,
+        message: "Not Found",
       };
     }
     response.statusCode = 200;
