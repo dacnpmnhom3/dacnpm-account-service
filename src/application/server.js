@@ -11,6 +11,7 @@ import cors from "cors";
 import adminRouter from "./account/admin/AdminRouter";
 import sellerRouter from "./account/seller/SellerRouter";
 import userRouter from "./account/user/UserRouter";
+import routes from "../routes/main.routes";
 
 import configPassport from "../../config/passport";
 
@@ -43,7 +44,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 
-// app.use("/", routes);
+app.use("/", routes);
 // app.use("/api/auth", authRouter);
 // app.use("/api/users", userRouter);
 app.use("/api/admin", adminRouter);
