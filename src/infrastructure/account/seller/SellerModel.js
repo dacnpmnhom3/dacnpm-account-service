@@ -5,7 +5,9 @@ class Seller extends Model {}
 Seller.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
+      autoIncrementIdentity: true,
+      autoIncrement: true,
       primaryKey: true,
     },
     email: {
@@ -61,7 +63,7 @@ Seller.init(
     sequelize,
     modelName: "seller",
     paranoid: true,
-  }
+  },
 );
 
 export default Seller;

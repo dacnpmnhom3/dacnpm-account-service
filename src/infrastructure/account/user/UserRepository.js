@@ -35,23 +35,18 @@ class UserRepository extends BaseRepository {
   //     });
   //     return result;
   // }
-
-  // async create(data) {
-  //     const result = await this.model.create(data);
-  //     return result;
-  // }
-
   async findOneByNameAndId(id, name) {
-      const result = await this.model.findOne({
-          where: { id: id, name: name },
-          raw: true
-      });
-      return result;
+    const result = await this.model.findOne({
+      where: { id, name },
+      raw: true,
+    });
+    return result;
   }
-// async create(data) {
-//     const result = await this.model.create(data);
-//     return result;
-// }
+
+  async update(id, data) {
+    const result = await this.model.update(data, { where: { id } });
+    return result;
+  }
 }
 
 export default UserRepository;

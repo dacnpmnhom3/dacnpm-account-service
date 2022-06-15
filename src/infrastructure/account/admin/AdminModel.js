@@ -4,6 +4,12 @@ import sequelize from "../../../../config/MySQLConfig";
 class Admin extends Model { }
 Admin.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrementIdentity: true,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     fullName: {
       type: DataTypes.STRING,
       allowNull: false,
